@@ -28,17 +28,19 @@ const App: React.FC = () => {
     localStorage.setItem('petStats', JSON.stringify(petStats));
   }, [petStats]);
 
-  const getStageFromLevel = (level: number): 'baby' | 'teen' | 'adult' | 'master' => {
-    if (level >= 25) return 'master';
-    if (level >= 15) return 'adult';
-    if (level >= 5) return 'teen';
+  const getStageFromLevel = (level: number): PetStats['stage'] => {
+    if (level >= 30) return 'volwassene';
+    if (level >= 25) return 'jeugd';
+    if (level >= 20) return 'tiener';
+    if (level >= 15) return 'kind';
+    if (level >= 10) return 'kleuter';
+    if (level >= 5) return 'peuter';
     return 'baby';
   };
 
   const resetGame = () => {
-    if (window.confirm("Weet je het zeker? Je raakt alle voortgang en je huisdier kwijt!")) {
+    if (window.confirm("Weet je het zeker? Je raakt alle voortgang kwijt!")) {
       setPetStats({ ...INITIAL_PET_STATS, stage: 'baby', inventory: {} });
-      setPetMessage("Hoi! Ik ben nieuw hier. Zullen we rekenen?");
       setGameState('dashboard');
     }
   };
@@ -65,7 +67,7 @@ const App: React.FC = () => {
         if (calculatedStage !== newStage) {
           newStage = calculatedStage;
           setShowEvolutionOverlay(true);
-          setTimeout(() => setShowEvolutionOverlay(false), 4000);
+          setTimeout(() => setShowEvolutionOverlay(false), 3000);
         }
       }
       
@@ -75,12 +77,12 @@ const App: React.FC = () => {
         exp: newExp,
         stage: newStage,
         coins: prev.coins + earnedCoins,
-        hunger: Math.max(0, prev.hunger - 12),
-        happiness: Math.min(100, prev.happiness + (correctCount * 3)),
+        hunger: Math.max(0, prev.hunger - 10),
+        happiness: Math.min(100, prev.happiness + (correctCount * 2)),
       };
     });
 
-    const perf = correctCount >= 7 ? 'great' : correctCount >= 4 ? 'good' : 'retry';
+    const perf = correctCount >= 8 ? 'great' : correctCount >= 5 ? 'good' : 'retry';
     const msg = await getEncouragement(petStats.name, petStats.level, perf);
     setPetMessage(msg);
     setGameState('dashboard');
@@ -88,27 +90,21 @@ const App: React.FC = () => {
 
   const handleBuyItem = (item: FoodItem) => {
     if (petStats.coins < item.cost) return;
-
     setPetStats(prev => ({
       ...prev,
       coins: prev.coins - item.cost,
-      inventory: {
-        ...prev.inventory,
-        [item.id]: (prev.inventory[item.id] || 0) + 1
-      }
+      inventory: { ...prev.inventory, [item.id]: (prev.inventory[item.id] || 0) + 1 }
     }));
-    setPetMessage(`Gekocht! Die ${item.name} zit in je rugzak. 🎒`);
   };
 
   const handleFeedPet = (itemId: string) => {
     const item = FOOD_ITEMS.find(f => f.id === itemId);
-    if (!item || !petStats.inventory[itemId] || petStats.inventory[itemId] <= 0) return;
+    if (!item || !petStats.inventory[itemId]) return;
 
     setPetStats(prev => {
       const newInventory = { ...prev.inventory };
       newInventory[itemId] -= 1;
       if (newInventory[itemId] <= 0) delete newInventory[itemId];
-
       return {
         ...prev,
         inventory: newInventory,
@@ -116,49 +112,33 @@ const App: React.FC = () => {
         happiness: Math.min(100, prev.happiness + item.happinessValue),
       };
     });
-    setPetMessage(`Nom nom nom! ${item.emoji} was heerlijk!`);
   };
 
   return (
-    <div className="min-h-screen pb-24 pt-4 px-3 flex flex-col items-center max-w-full overflow-x-hidden relative">
+    <div className="min-h-screen pb-14 pt-1 px-3 flex flex-col items-center max-w-full overflow-x-hidden relative bg-sky-50">
       {showEvolutionOverlay && (
-        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-sky-600/90 backdrop-blur-sm animate-in fade-in duration-500">
-          <div className="text-6xl mb-4 animate-bounce">✨ ✨ ✨</div>
-          <h2 className="text-4xl font-fredoka text-white text-center px-6">
-            WAUW! {petStats.name} is gegroeid naar de {petStats.stage} fase!
-          </h2>
-          <div className="mt-8 text-2xl text-yellow-300 font-bold animate-pulse">
-            Je bent een echte reken-expert!
-          </div>
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-sky-600/95 backdrop-blur-md">
+          <div className="text-7xl mb-4 animate-bounce">🐼✨</div>
+          <h2 className="text-4xl font-fredoka text-white text-center">GEWELDIG!</h2>
+          <p className="text-xl text-white font-bold mt-2">{petStats.name} groeit naar {petStats.stage}!</p>
         </div>
       )}
 
-      <header className="mb-6 w-full max-w-md px-4 flex items-center justify-between">
-        <button onClick={resetGame} className="text-slate-300 hover:text-red-400 text-xs font-bold w-12 text-left">
-          Reset
-        </button>
-        <div className="text-center flex-1">
-          <h1 className="text-2xl sm:text-3xl font-fredoka text-sky-600 leading-none">RekenVriendje</h1>
-        </div>
-        <div className="bg-yellow-100 px-3 py-1.5 rounded-full border-2 border-yellow-200 shadow-sm flex items-center gap-1.5 w-max">
-          <span className="text-lg">💰</span>
-          <span className="font-bold text-yellow-700 text-sm sm:text-base">{petStats.coins}</span>
+      <header className="mb-2 w-full max-w-md px-2 flex items-center justify-between">
+        <button onClick={resetGame} className="text-slate-300 text-[8px] font-black uppercase tracking-tighter">Reset</button>
+        <h1 className="text-lg font-fredoka text-sky-600 tracking-tight">RekenVriendje</h1>
+        <div className="bg-yellow-100 px-2 py-0.5 rounded-full border border-yellow-200 flex items-center gap-1 shadow-sm">
+          <span className="text-xs">💰</span>
+          <span className="font-black text-yellow-700 text-xs">{petStats.coins}</span>
         </div>
       </header>
 
-      <main className="w-full max-w-4xl flex flex-col items-center gap-4 sm:gap-6">
+      <main className="w-full max-w-md flex flex-col items-center gap-3">
         {gameState === 'dashboard' && (
-          <div className="flex flex-col lg:flex-row gap-6 w-full items-start justify-center px-2">
-            {/* Linkerkant: Het Huisdier */}
-            <div className="w-full max-w-sm animate-in zoom-in-95 duration-300">
-              <PetDisplay stats={petStats} message={petMessage} />
-            </div>
-            
-            {/* Rechterkant: De Rugzak (Inventory) */}
-            <div className="w-full max-w-sm">
-               <Inventory inventory={petStats.inventory} onFeed={handleFeedPet} />
-            </div>
-          </div>
+          <>
+            <PetDisplay stats={petStats} message={petMessage} />
+            <Inventory inventory={petStats.inventory} onFeed={handleFeedPet} />
+          </>
         )}
 
         {gameState === 'practice_selection' && (
@@ -166,47 +146,28 @@ const App: React.FC = () => {
         )}
 
         {gameState === 'practice_game' && practiceConfig && (
-          <MathGame 
-            config={practiceConfig}
-            onComplete={handlePracticeComplete} 
-            onCancel={() => setGameState('practice_selection')} 
-          />
+          <MathGame config={practiceConfig} onComplete={handlePracticeComplete} onCancel={() => setGameState('practice_selection')} />
         )}
 
         {gameState === 'store' && (
-          <Store 
-            coins={petStats.coins} 
-            onBuy={handleBuyItem} 
-            onClose={() => setGameState('dashboard')} 
-          />
+          <Store coins={petStats.coins} onBuy={handleBuyItem} onClose={() => setGameState('dashboard')} />
         )}
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-200 flex justify-around p-3 pb-8 sm:pb-4 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-50">
-        <button 
-          onClick={() => setGameState('dashboard')}
-          className={`flex flex-col items-center px-6 transition-all transform ${gameState === 'dashboard' ? 'text-sky-500 scale-110' : 'text-slate-400 hover:text-sky-300 active:scale-90'}`}
-        >
-          <span className="text-2xl sm:text-3xl">🏠</span>
-          <span className="text-[10px] font-bold mt-1">HUIS</span>
-        </button>
-        <button 
-          onClick={() => setGameState('practice_selection')}
-          className={`flex flex-col items-center px-6 transition-all transform ${gameState.includes('practice') ? 'text-sky-500 scale-110' : 'text-slate-400 hover:text-sky-300 active:scale-90'}`}
-        >
-          <span className="text-2xl sm:text-3xl">🧠</span>
-          <span className="text-[10px] font-bold mt-1">OEFENEN</span>
-        </button>
-        <button 
-          onClick={() => setGameState('store')}
-          className={`flex flex-col items-center px-6 transition-all transform ${gameState === 'store' ? 'text-sky-500 scale-110' : 'text-slate-400 hover:text-sky-300 active:scale-90'}`}
-        >
-          <span className="text-2xl sm:text-3xl">🛒</span>
-          <span className="text-[10px] font-bold mt-1">WINKEL</span>
-        </button>
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-slate-200 flex justify-around p-1 pb-2 z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.03)]">
+        <NavBtn active={gameState === 'dashboard'} onClick={() => setGameState('dashboard')} icon="🏠" label="HUIS" />
+        <NavBtn active={gameState.includes('practice')} onClick={() => setGameState('practice_selection')} icon="🧠" label="OEFENEN" />
+        <NavBtn active={gameState === 'store'} onClick={() => setGameState('store')} icon="🛒" label="WINKEL" />
       </nav>
     </div>
   );
 };
+
+const NavBtn = ({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: string, label: string }) => (
+  <button onClick={onClick} className={`flex flex-col items-center px-4 transition-all duration-300 ${active ? 'text-sky-500 scale-110' : 'text-slate-400 opacity-70'}`}>
+    <span className="text-xl mb-0.5">{icon}</span>
+    <span className="text-[7px] font-black tracking-widest">{label}</span>
+  </button>
+);
 
 export default App;

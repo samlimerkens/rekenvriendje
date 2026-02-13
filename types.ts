@@ -6,7 +6,7 @@ export type PetStats = {
   hunger: number; // 0 to 100
   happiness: number; // 0 to 100
   coins: number;
-  stage: 'baby' | 'teen' | 'adult' | 'master';
+  stage: 'baby' | 'peuter' | 'kleuter' | 'kind' | 'tiener' | 'jeugd' | 'volwassene';
   inventory: Record<string, number>; // itemId -> count
 };
 
@@ -25,8 +25,8 @@ export type MathProblem = {
   answer: number;
   options: number[];
   type: string;
-  total?: number; // Added for visual splitting
-  part1?: number; // Added for visual splitting
+  total?: number; 
+  part1?: number; 
 };
 
 export type FoodItem = {

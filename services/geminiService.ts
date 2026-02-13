@@ -1,48 +1,51 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-// Initialize the GoogleGenAI client with the API key from environment variables.
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const getEncouragement = async (petName: string, level: number, performance: 'good' | 'great' | 'retry') => {
   try {
-    const stage = level >= 25 ? 'Master' : level >= 15 ? 'Volwassen' : level >= 5 ? 'Tiener' : 'Baby';
+    let stage = 'Baby';
+    if (level >= 30) stage = 'Volwassene';
+    else if (level >= 25) stage = 'Jeugd';
+    else if (level >= 20) stage = 'Tiener';
+    else if (level >= 15) stage = 'Kind';
+    else if (level >= 10) stage = 'Kleuter';
+    else if (level >= 5) stage = 'Peuter';
+
     const prompt = `Je bent de stem van een schattig digitaal huisdier genaamd ${petName}. 
     Het huisdier is in de ${stage} fase en level ${level}.
     De speler is een kind in de lagere school die net rekenoefeningen heeft gedaan. 
     De prestatie was: ${performance}.
     
-    Als het huisdier een 'Baby' is, praat dan heel simpel en schattig.
-    Als het huisdier 'Tiener' is, wees dan stoer en enthousiast.
-    Als het huisdier 'Volwassen' is, wees dan trots en wijs.
-    Als het huisdier 'Master' is, behandel het kind als een gelijke reken-genie.
+    Pas je toon aan op je fase (${stage}):
+    - Baby/Peuter: Heel lief, woordjes als 'joepie' en 'hapje'.
+    - Kleuter/Kind: Enthousiast en trots, moedig aan om door te gaan.
+    - Tiener/Jeugd: Stoer, 'lekker bezig', 'reken-pro'.
+    - Volwassene: Trots, wijs en noem het kind een 'rekenmeester'.
 
-    Geef een kort berichtje in het Nederlands (max 15 woorden). Gebruik emoticons.`;
+    Geef een kort berichtje in het Nederlands (max 12 woorden). Gebruik emoticons.`;
 
-    // Query the model for text content using the recommended model for basic text tasks.
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: prompt,
     });
 
-    // Access the .text property directly (not a method).
-    return response.text || "Goed gedaan! Blijf oefenen!";
+    return response.text || "Goed gedaan! Blijf oefenen! 🌟";
   } catch (error) {
     console.error("Gemini Error:", error);
-    return "Je bent een rekenkampioen!";
+    return "Je bent een rekenkampioen! 🏆";
   }
 };
 
 export const getMathFact = async () => {
   try {
-    // Query the model for text content using the recommended model for basic text tasks.
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: "Geef een leuk, kort weetje over getallen of rekenen dat interessant is voor kinderen van 8 jaar. In het Nederlands.",
+      contents: "Geef een leuk, kort weetje over getallen of rekenen dat interessant is voor kinderen van 8 jaar. In het Nederlands. Max 15 woorden.",
     });
-    // Access the .text property directly (not a method).
-    return response.text || "Wist je dat 0 het enige getal is dat niet als Romeins cijfer geschreven kan worden?";
+    return response.text || "Wist je dat 0 pas later is uitgevonden? 🔢";
   } catch (error) {
-    return "Rekenen is overal om ons heen!";
+    return "Rekenen is overal om ons heen! ✨";
   }
 };
