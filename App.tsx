@@ -7,6 +7,7 @@ import MathGame from './components/MathGame';
 import Store from './components/Store';
 import PracticeSelection from './components/PracticeSelection';
 import Inventory from './components/Inventory';
+import Celebration from './components/Celebration';
 import { getEncouragement } from './services/geminiService';
 
 const App: React.FC = () => {
@@ -23,6 +24,9 @@ const App: React.FC = () => {
   const [petMessage, setPetMessage] = useState<string>("Hoi! Zullen we gaan rekenen?");
   const [showEvolutionOverlay, setShowEvolutionOverlay] = useState(false);
   const [practiceConfig, setPracticeConfig] = useState<PracticeConfig | null>(null);
+  
+  // Tijdelijke opslag voor resultaten van de laatste sessie
+  const [lastResults, setLastResults] = useState<{ correct: number; coins: number; exp: number } | null>(null);
 
   useEffect(() => {
     localStorage.setItem('petStats', JSON.stringify(petStats));
@@ -51,9 +55,12 @@ const App: React.FC = () => {
   };
 
   const handlePracticeComplete = async (correctCount: number) => {
-    const earnedCoins = correctCount * 5;
+    const earnedCoins = 10;
     const earnedExp = correctCount * 15;
     
+    // Sla resultaten op voor het Celebration scherm
+    setLastResults({ correct: correctCount, coins: earnedCoins, exp: earnedExp });
+
     setPetStats(prev => {
       let newExp = prev.exp + earnedExp;
       let newLevel = prev.level;
@@ -82,10 +89,12 @@ const App: React.FC = () => {
       };
     });
 
+    // Haal alvast een berichtje op van de Gemini AI
     const perf = correctCount >= 8 ? 'great' : correctCount >= 5 ? 'good' : 'retry';
-    const msg = await getEncouragement(petStats.name, petStats.level, perf);
-    setPetMessage(msg);
-    setGameState('dashboard');
+    getEncouragement(petStats.name, petStats.level, perf).then(msg => setPetMessage(msg));
+    
+    // Toon het feestscherm!
+    setGameState('celebration');
   };
 
   const handleBuyItem = (item: FoodItem) => {
@@ -124,6 +133,16 @@ const App: React.FC = () => {
         </div>
       )}
 
+      {/* Celebration Scherm Overlay */}
+      {gameState === 'celebration' && lastResults && (
+        <Celebration 
+          correctCount={lastResults.correct} 
+          earnedCoins={lastResults.coins}
+          earnedExp={lastResults.exp}
+          onClose={() => setGameState('dashboard')} 
+        />
+      )}
+
       <header className="mb-2 w-full max-w-md px-2 flex items-center justify-between">
         <button onClick={resetGame} className="text-slate-300 text-[8px] font-black uppercase tracking-tighter">Reset</button>
         <h1 className="text-lg font-fredoka text-sky-600 tracking-tight">RekenVriendje</h1>
@@ -155,7 +174,7 @@ const App: React.FC = () => {
       </main>
 
       <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-slate-200 flex justify-around p-1 pb-2 z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.03)]">
-        <NavBtn active={gameState === 'dashboard'} onClick={() => setGameState('dashboard')} icon="🏠" label="HUIS" />
+        <NavBtn active={gameState === 'dashboard' || gameState === 'celebration'} onClick={() => setGameState('dashboard')} icon="🏠" label="HUIS" />
         <NavBtn active={gameState.includes('practice')} onClick={() => setGameState('practice_selection')} icon="🧠" label="OEFENEN" />
         <NavBtn active={gameState === 'store'} onClick={() => setGameState('store')} icon="🛒" label="WINKEL" />
       </nav>

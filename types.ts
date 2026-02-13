@@ -38,4 +38,4 @@ export type FoodItem = {
   happinessValue: number;
 };
 
-export type GameState = 'dashboard' | 'practice_selection' | 'practice_game' | 'store';
+export type GameState = 'dashboard' | 'practice_selection' | 'practice_game' | 'celebration' | 'store';
