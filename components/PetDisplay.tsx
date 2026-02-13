@@ -8,37 +8,21 @@ interface PetDisplayProps {
 }
 
 const PetDisplay: React.FC<PetDisplayProps> = ({ stats, message }) => {
-  // We gaan ervan uit dat de gebruiker de geüploade afbeelding heeft opgeslagen als 'pandas.png'
-  const pandasImgUrl = "./pandas.png";
-  
-  // Logica om te bepalen welke panda uit de afbeelding we tonen
-  // De afbeelding heeft 3 panda's: Kind (Links), Kleuter (Midden), Baby (Rechts)
-  const getPandaPosition = () => {
+  // Mapping van de stadia naar de specifieke bestanden
+  const getPandaImage = () => {
     switch (stats.stage) {
-      case 'volwassene':
-      case 'jeugd':
-      case 'tiener':
-      case 'kind':
-        return { pos: '0%', scale: 'scale-110' }; // Linker panda (Kind/Groot)
-      case 'kleuter':
-      case 'peuter':
-        return { pos: '50%', scale: 'scale-100' }; // Middelste panda (Kleuter)
+      case 'kind': return "./kind.png";
+      case 'kleuter': return "./kleuter.png";
       case 'baby':
-      default:
-        return { pos: '100%', scale: 'scale-90' }; // Rechter panda (Baby)
+      default: return "./baby.png";
     }
   };
 
-  const { pos, scale } = getPandaPosition();
-
   const getStageColor = () => {
     switch (stats.stage) {
-      case 'volwassene': return 'from-emerald-100 to-teal-50 border-teal-200';
-      case 'jeugd': return 'from-blue-100 to-sky-50 border-sky-200';
-      case 'tiener': return 'from-purple-100 to-fuchsia-50 border-fuchsia-200';
       case 'kind': return 'from-green-100 to-lime-50 border-lime-200';
       case 'kleuter': return 'from-yellow-100 to-orange-50 border-orange-200';
-      case 'peuter': return 'from-pink-100 to-rose-50 border-rose-200';
+      case 'baby':
       default: return 'from-slate-50 to-emerald-50 border-emerald-100';
     }
   };
@@ -51,34 +35,29 @@ const PetDisplay: React.FC<PetDisplayProps> = ({ stats, message }) => {
 
   return (
     <div className={`flex flex-col items-center p-5 rounded-[2.5rem] shadow-xl border-4 w-full transition-all duration-700 bg-gradient-to-b ${getStageColor()}`}>
-      <div className="relative mb-6 mt-4 w-48 h-48 flex items-center justify-center overflow-hidden">
+      <div className="relative mb-6 mt-4 w-56 h-56 flex items-center justify-center">
         {/* Glow effect achter de panda */}
         <div className="absolute inset-0 bg-white/40 blur-3xl rounded-full scale-110"></div>
         
-        {/* De 'Sprite' container die de juiste panda uitsnijdt */}
-        <div className={`relative w-40 h-40 transition-all duration-1000 ease-out ${scale} flex items-center justify-center`}>
-          <div className="w-full h-full overflow-hidden flex items-center justify-center">
-             <img 
-              src={pandasImgUrl} 
-              alt="Mijn Panda" 
-              className="h-full max-w-none animate-float drop-shadow-xl"
-              style={{
-                width: '300%', // Omdat er 3 panda's naast elkaar staan
-                objectFit: 'cover',
-                objectPosition: `${pos} center`
-              }}
-              onError={(e) => {
-                // Als pandas.png niet gevonden wordt, tonen we een placeholder emoji
-                e.currentTarget.style.display = 'none';
-                const parent = e.currentTarget.parentElement;
-                if (parent) parent.innerHTML = '<span class="text-8xl">🐼</span>';
-              }}
-            />
-          </div>
-        </div>
+        <img 
+          src={getPandaImage()} 
+          alt={`Mijn Panda ${stats.stage}`} 
+          className="w-full h-full object-contain animate-float drop-shadow-xl z-10"
+          onError={(e) => {
+            // Fallback emoji als de png's nog niet zijn geüpload
+            e.currentTarget.style.display = 'none';
+            const parent = e.currentTarget.parentElement;
+            if (parent) {
+              const emoji = document.createElement('span');
+              emoji.className = "text-9xl";
+              emoji.innerText = "🐼";
+              parent.appendChild(emoji);
+            }
+          }}
+        />
         
         {/* Level Badge */}
-        <div className="absolute top-0 right-0 bg-emerald-500 text-white font-fredoka px-3 py-1 rounded-full border-4 border-white text-sm shadow-lg z-20">
+        <div className="absolute top-2 right-2 bg-emerald-500 text-white font-fredoka px-3 py-1 rounded-full border-4 border-white text-sm shadow-lg z-20">
           LVL {stats.level}
         </div>
 

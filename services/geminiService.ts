@@ -6,23 +6,18 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 export const getEncouragement = async (petName: string, level: number, performance: 'good' | 'great' | 'retry') => {
   try {
     let stage = 'Baby';
-    if (level >= 30) stage = 'Volwassene';
-    else if (level >= 25) stage = 'Jeugd';
-    else if (level >= 20) stage = 'Tiener';
-    else if (level >= 15) stage = 'Kind';
-    else if (level >= 10) stage = 'Kleuter';
-    else if (level >= 5) stage = 'Peuter';
+    if (level >= 10) stage = 'Kind';
+    else if (level >= 5) stage = 'Kleuter';
 
-    const prompt = `Je bent de stem van een schattig digitaal huisdier genaamd ${petName}. 
-    Het huisdier is in de ${stage} fase en level ${level}.
+    const prompt = `Je bent de stem van een schattige panda genaamd ${petName}. 
+    De panda is in de ${stage} fase en level ${level}.
     De speler is een kind in de lagere school die net rekenoefeningen heeft gedaan. 
     De prestatie was: ${performance}.
     
     Pas je toon aan op je fase (${stage}):
-    - Baby/Peuter: Heel lief, woordjes als 'joepie' en 'hapje'.
-    - Kleuter/Kind: Enthousiast en trots, moedig aan om door te gaan.
-    - Tiener/Jeugd: Stoer, 'lekker bezig', 'reken-pro'.
-    - Volwassene: Trots, wijs en noem het kind een 'rekenmeester'.
+    - Baby: Heel lief, brabbelt een beetje met woordjes als 'joepie' en 'bamboe'.
+    - Kleuter: Enthousiast en trots, moedig aan om meer te oefenen.
+    - Kind: Slim en vrolijk, 'lekker bezig', 'reken-kampioen'.
 
     Geef een kort berichtje in het Nederlands (max 12 woorden). Gebruik emoticons.`;
 

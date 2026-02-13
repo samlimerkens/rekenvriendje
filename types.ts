@@ -6,7 +6,7 @@ export type PetStats = {
   hunger: number; // 0 to 100
   happiness: number; // 0 to 100
   coins: number;
-  stage: 'baby' | 'peuter' | 'kleuter' | 'kind' | 'tiener' | 'jeugd' | 'volwassene';
+  stage: 'baby' | 'kleuter' | 'kind';
   inventory: Record<string, number>; // itemId -> count
 };
 

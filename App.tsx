@@ -17,9 +17,13 @@ const App: React.FC = () => {
     if (saved) {
       const parsed = JSON.parse(saved);
       if (!parsed.inventory) parsed.inventory = {};
+      // Zorg dat we oude stats naar de nieuwe 3 stadia forceren
+      if (parsed.stage !== 'baby' && parsed.stage !== 'kleuter' && parsed.stage !== 'kind') {
+        parsed.stage = parsed.level < 5 ? 'baby' : parsed.level < 10 ? 'kleuter' : 'kind';
+      }
       return parsed;
     }
-    return { ...INITIAL_PET_STATS, name: 'Pando', stage: 'baby', inventory: {} };
+    return INITIAL_PET_STATS;
   });
   const [petMessage, setPetMessage] = useState<string>("Hoi! Heb je zin om samen te rekenen? 🎋");
   const [showEvolutionOverlay, setShowEvolutionOverlay] = useState(false);
@@ -32,18 +36,14 @@ const App: React.FC = () => {
   }, [petStats]);
 
   const getStageFromLevel = (level: number): PetStats['stage'] => {
-    if (level >= 30) return 'volwassene';
-    if (level >= 25) return 'jeugd';
-    if (level >= 20) return 'tiener';
-    if (level >= 15) return 'kind';
-    if (level >= 10) return 'kleuter';
-    if (level >= 5) return 'peuter';
+    if (level >= 10) return 'kind';
+    if (level >= 5) return 'kleuter';
     return 'baby';
   };
 
   const resetGame = () => {
     if (window.confirm("Weet je het zeker? Je raakt alle voortgang kwijt!")) {
-      setPetStats({ ...INITIAL_PET_STATS, name: 'Pando', stage: 'baby', inventory: {} });
+      setPetStats(INITIAL_PET_STATS);
       setGameState('dashboard');
     }
   };
@@ -125,9 +125,9 @@ const App: React.FC = () => {
       {showEvolutionOverlay && (
         <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-emerald-600/95 backdrop-blur-md animate-in fade-in duration-500">
           <div className="text-9xl mb-4 animate-bounce drop-shadow-2xl">🐼✨</div>
-          <h2 className="text-5xl font-fredoka text-white text-center drop-shadow-md">SUPER GOED!</h2>
+          <h2 className="text-5xl font-fredoka text-white text-center drop-shadow-md uppercase">Wauw!</h2>
           <p className="text-2xl text-white font-bold mt-4 bg-white/20 px-6 py-2 rounded-full border border-white/30">
-            {petStats.name} is nu een {petStats.stage}!
+            {petStats.name} is gegroeid naar {petStats.stage}!
           </p>
         </div>
       )}
@@ -142,7 +142,7 @@ const App: React.FC = () => {
       )}
 
       <header className="mb-4 w-full max-w-md px-2 flex items-center justify-between mt-2">
-        <button onClick={resetGame} className="text-emerald-300 text-[10px] font-black uppercase tracking-widest hover:text-emerald-500 transition-colors">Opnieuw beginnen</button>
+        <button onClick={resetGame} className="text-emerald-300 text-[10px] font-black uppercase tracking-widest hover:text-emerald-500 transition-colors">Reset</button>
         <h1 className="text-2xl font-fredoka text-emerald-600 tracking-tight drop-shadow-sm">RekenVriendje</h1>
         <div className="bg-emerald-100 px-3 py-1 rounded-full border-2 border-emerald-200 flex items-center gap-2 shadow-sm">
           <span className="text-sm">💰</span>

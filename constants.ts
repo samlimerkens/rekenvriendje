@@ -1,13 +1,12 @@
 
 import { FoodItem, PetStats } from './types';
 
-// Fixed missing inventory property in INITIAL_PET_STATS
 export const INITIAL_PET_STATS: PetStats = {
-  name: 'Flappie',
+  name: 'Pando',
   level: 1,
   exp: 0,
-  hunger: 50,
-  happiness: 50,
+  hunger: 70,
+  happiness: 70,
   coins: 20,
   stage: 'baby',
   inventory: {},
@@ -21,9 +20,3 @@ export const FOOD_ITEMS: FoodItem[] = [
   { id: 'burger', name: 'Burger', emoji: '🍔', cost: 20, hungerValue: 50, happinessValue: 15 },
   { id: 'cake', name: 'Taart', emoji: '🍰', cost: 25, hungerValue: 20, happinessValue: 50 },
 ];
-
-export const PET_STAGES = {
-  baby: 'https://picsum.photos/seed/pet-baby/300/300',
-  teen: 'https://picsum.photos/seed/pet-teen/300/300',
-  adult: 'https://picsum.photos/seed/pet-adult/300/300',
-};
