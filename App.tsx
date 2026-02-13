@@ -19,13 +19,12 @@ const App: React.FC = () => {
       if (!parsed.inventory) parsed.inventory = {};
       return parsed;
     }
-    return { ...INITIAL_PET_STATS, stage: 'baby', inventory: {} };
+    return { ...INITIAL_PET_STATS, name: 'Pando', stage: 'baby', inventory: {} };
   });
-  const [petMessage, setPetMessage] = useState<string>("Hoi! Zullen we gaan rekenen?");
+  const [petMessage, setPetMessage] = useState<string>("Hoi! Heb je zin om samen te rekenen? 🎋");
   const [showEvolutionOverlay, setShowEvolutionOverlay] = useState(false);
   const [practiceConfig, setPracticeConfig] = useState<PracticeConfig | null>(null);
   
-  // Tijdelijke opslag voor resultaten van de laatste sessie
   const [lastResults, setLastResults] = useState<{ correct: number; coins: number; exp: number } | null>(null);
 
   useEffect(() => {
@@ -44,7 +43,7 @@ const App: React.FC = () => {
 
   const resetGame = () => {
     if (window.confirm("Weet je het zeker? Je raakt alle voortgang kwijt!")) {
-      setPetStats({ ...INITIAL_PET_STATS, stage: 'baby', inventory: {} });
+      setPetStats({ ...INITIAL_PET_STATS, name: 'Pando', stage: 'baby', inventory: {} });
       setGameState('dashboard');
     }
   };
@@ -58,7 +57,6 @@ const App: React.FC = () => {
     const earnedCoins = 10;
     const earnedExp = correctCount * 15;
     
-    // Sla resultaten op voor het Celebration scherm
     setLastResults({ correct: correctCount, coins: earnedCoins, exp: earnedExp });
 
     setPetStats(prev => {
@@ -89,11 +87,9 @@ const App: React.FC = () => {
       };
     });
 
-    // Haal alvast een berichtje op van de Gemini AI
     const perf = correctCount >= 8 ? 'great' : correctCount >= 5 ? 'good' : 'retry';
     getEncouragement(petStats.name, petStats.level, perf).then(msg => setPetMessage(msg));
     
-    // Toon het feestscherm!
     setGameState('celebration');
   };
 
@@ -121,19 +117,21 @@ const App: React.FC = () => {
         happiness: Math.min(100, prev.happiness + item.happinessValue),
       };
     });
+    setPetMessage("Mmm, lekker hoor! Dankjewel! 🎋✨");
   };
 
   return (
-    <div className="min-h-screen pb-14 pt-1 px-3 flex flex-col items-center max-w-full overflow-x-hidden relative bg-sky-50">
+    <div className="min-h-screen pb-14 pt-1 px-3 flex flex-col items-center max-w-full overflow-x-hidden relative bg-[#f7fff7]">
       {showEvolutionOverlay && (
-        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-sky-600/95 backdrop-blur-md">
-          <div className="text-7xl mb-4 animate-bounce">🐼✨</div>
-          <h2 className="text-4xl font-fredoka text-white text-center">GEWELDIG!</h2>
-          <p className="text-xl text-white font-bold mt-2">{petStats.name} groeit naar {petStats.stage}!</p>
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-emerald-600/95 backdrop-blur-md animate-in fade-in duration-500">
+          <div className="text-9xl mb-4 animate-bounce drop-shadow-2xl">🐼✨</div>
+          <h2 className="text-5xl font-fredoka text-white text-center drop-shadow-md">SUPER GOED!</h2>
+          <p className="text-2xl text-white font-bold mt-4 bg-white/20 px-6 py-2 rounded-full border border-white/30">
+            {petStats.name} is nu een {petStats.stage}!
+          </p>
         </div>
       )}
 
-      {/* Celebration Scherm Overlay */}
       {gameState === 'celebration' && lastResults && (
         <Celebration 
           correctCount={lastResults.correct} 
@@ -143,16 +141,16 @@ const App: React.FC = () => {
         />
       )}
 
-      <header className="mb-2 w-full max-w-md px-2 flex items-center justify-between">
-        <button onClick={resetGame} className="text-slate-300 text-[8px] font-black uppercase tracking-tighter">Reset</button>
-        <h1 className="text-lg font-fredoka text-sky-600 tracking-tight">RekenVriendje</h1>
-        <div className="bg-yellow-100 px-2 py-0.5 rounded-full border border-yellow-200 flex items-center gap-1 shadow-sm">
-          <span className="text-xs">💰</span>
-          <span className="font-black text-yellow-700 text-xs">{petStats.coins}</span>
+      <header className="mb-4 w-full max-w-md px-2 flex items-center justify-between mt-2">
+        <button onClick={resetGame} className="text-emerald-300 text-[10px] font-black uppercase tracking-widest hover:text-emerald-500 transition-colors">Opnieuw beginnen</button>
+        <h1 className="text-2xl font-fredoka text-emerald-600 tracking-tight drop-shadow-sm">RekenVriendje</h1>
+        <div className="bg-emerald-100 px-3 py-1 rounded-full border-2 border-emerald-200 flex items-center gap-2 shadow-sm">
+          <span className="text-sm">💰</span>
+          <span className="font-fredoka text-emerald-700 text-sm">{petStats.coins}</span>
         </div>
       </header>
 
-      <main className="w-full max-w-md flex flex-col items-center gap-3">
+      <main className="w-full max-w-md flex flex-col items-center gap-4">
         {gameState === 'dashboard' && (
           <>
             <PetDisplay stats={petStats} message={petMessage} />
@@ -173,7 +171,7 @@ const App: React.FC = () => {
         )}
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-slate-200 flex justify-around p-1 pb-2 z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.03)]">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t-2 border-emerald-100 flex justify-around p-2 pb-3 z-50 shadow-[0_-5px_20px_rgba(16,185,129,0.1)]">
         <NavBtn active={gameState === 'dashboard' || gameState === 'celebration'} onClick={() => setGameState('dashboard')} icon="🏠" label="HUIS" />
         <NavBtn active={gameState.includes('practice')} onClick={() => setGameState('practice_selection')} icon="🧠" label="OEFENEN" />
         <NavBtn active={gameState === 'store'} onClick={() => setGameState('store')} icon="🛒" label="WINKEL" />
@@ -183,9 +181,9 @@ const App: React.FC = () => {
 };
 
 const NavBtn = ({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: string, label: string }) => (
-  <button onClick={onClick} className={`flex flex-col items-center px-4 transition-all duration-300 ${active ? 'text-sky-500 scale-110' : 'text-slate-400 opacity-70'}`}>
-    <span className="text-xl mb-0.5">{icon}</span>
-    <span className="text-[7px] font-black tracking-widest">{label}</span>
+  <button onClick={onClick} className={`flex flex-col items-center px-6 transition-all duration-300 ${active ? 'text-emerald-500 scale-110' : 'text-emerald-200 opacity-60'}`}>
+    <span className="text-2xl mb-1">{icon}</span>
+    <span className="text-[8px] font-black tracking-[0.2em]">{label}</span>
   </button>
 );
 
